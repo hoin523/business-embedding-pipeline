@@ -20,6 +20,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--epochs", type=int, default=1)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--learning-rate", type=float, default=2e-5)
+    parser.add_argument("--max-positive-pairs", type=int, default=10000)
+    parser.add_argument("--device", default=None, help="Optional torch device, for example mps, cuda, or cpu.")
     return parser.parse_args()
 
 
@@ -33,6 +35,8 @@ def main() -> None:
     args = parse_args()
     pairs = read_pairs(args.pairs)
     pairs = pairs[pairs["label"] >= 0.7].copy()
+    if args.max_positive_pairs and len(pairs) > args.max_positive_pairs:
+        pairs = pairs.sample(n=args.max_positive_pairs, random_state=42)
     examples = [
         InputExample(texts=[row.text_a, row.text_b])
         for row in pairs.itertuples(index=False)
@@ -40,7 +44,7 @@ def main() -> None:
     if not examples:
         raise SystemExit("No positive pairs found. Generate pairs before training.")
 
-    model = SentenceTransformer(args.base_model)
+    model = SentenceTransformer(args.base_model, device=args.device)
     train_loader = DataLoader(examples, shuffle=True, batch_size=args.batch_size)
     train_loss = losses.MultipleNegativesRankingLoss(model)
     model.fit(

@@ -2,6 +2,7 @@ from bizembed.collect import (
     DataGoKrClient,
     build_request_params,
     detect_industry_codes,
+    normalize_service_key,
     extract_items,
     should_continue,
 )
@@ -52,6 +53,10 @@ def test_build_request_params_uses_standard_service_key_and_json_type():
     assert params["numOfRows"] == 500
     assert params["type"] == "json"
     assert params["divId"] == "indsLclsCd"
+
+
+def test_normalize_service_key_decodes_portal_display_value():
+    assert normalize_service_key("abc%2Bdef%3D%3D") == "abc+def=="
 
 
 def test_extract_items_handles_data_go_kr_json_shape():

@@ -1,11 +1,17 @@
 from __future__ import annotations
 
 from typing import Any, Dict, Iterable, List, Mapping, Optional
+from urllib.parse import unquote
 
 import requests
 
 
 DEFAULT_TIMEOUT = 30
+
+
+def normalize_service_key(service_key: str) -> str:
+    """Accept the portal's encoded display key and hand requests a raw value."""
+    return unquote(service_key.strip())
 
 
 def build_request_params(
@@ -75,7 +81,7 @@ def detect_industry_codes(items: Iterable[Mapping[str, Any]]) -> List[str]:
 
 class DataGoKrClient:
     def __init__(self, *, service_key: str, session: Optional[Any] = None, timeout: int = DEFAULT_TIMEOUT):
-        self.service_key = service_key
+        self.service_key = normalize_service_key(service_key)
         self.session = session or requests.Session()
         self.timeout = timeout
 

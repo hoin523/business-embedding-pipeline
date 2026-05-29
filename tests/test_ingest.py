@@ -1,6 +1,7 @@
 import pandas as pd
+import zipfile
 
-from bizembed.ingest import standardize_dataframe
+from bizembed.ingest import read_table, source_usecols, standardize_dataframe
 
 
 def test_standardize_sbiz_store_columns():
@@ -43,3 +44,20 @@ def test_standardize_supplier_columns_with_item_name():
     assert result.loc[0, "industry_name"] == "식자재 도매업"
     assert result.loc[0, "item_name"] == "급식재료"
     assert result.loc[0, "text"] == "공급업체명: 한국식품유통 | 업종명: 식자재 도매업 | 품목명: 급식재료"
+
+
+def test_read_table_concatenates_zip_csv_files(tmp_path):
+    zip_path = tmp_path / "stores.zip"
+    with zipfile.ZipFile(zip_path, "w") as archive:
+        archive.writestr("a.csv", "상호명,상권업종소분류명\n보나비,일반한식\n")
+        archive.writestr("b.csv", "상호명,상권업종소분류명\n다빈치모텔,여관/모텔\n")
+        archive.writestr("readme.txt", "ignore")
+
+    result = read_table(zip_path)
+
+    assert result["상호명"].tolist() == ["보나비", "다빈치모텔"]
+
+
+def test_source_usecols_limits_sbiz_to_training_fields():
+    assert "상호명" in source_usecols("sbiz")
+    assert "도로명주소" not in source_usecols("sbiz")

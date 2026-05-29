@@ -34,6 +34,49 @@ pip install -e '.[dev]'
 pytest -q
 ```
 
+## 데이터 수집
+
+현재 프로젝트는 비공개 접근이나 인증 우회 없이, 공개 원천을 최대한 자동화해서 가져옵니다.
+
+수집 가능한 원천 목록을 확인합니다.
+
+```bash
+python scripts/list_sources.py
+```
+
+공공데이터포털 인증키를 환경변수로 넣습니다.
+
+```bash
+export DATA_GO_KR_SERVICE_KEY='공공데이터포털에서 발급받은 일반 인증키'
+```
+
+소상공인 상가정보 API를 업종코드 기준으로 수집합니다.
+
+```bash
+python scripts/download_sbiz_by_industry.py \
+  --industry-code I20101 \
+  --out data/raw/sbiz_I20101.csv
+```
+
+소상공인 상가정보 전체 수집은 소분류 업종코드 목록을 먼저 받은 뒤 전체 코드를 순회합니다.
+
+```bash
+python scripts/download_sbiz_all.py \
+  --out data/raw/sbiz_all.csv
+```
+
+공공데이터포털의 임의 OpenAPI endpoint는 범용 수집기로 받을 수 있습니다.
+
+```bash
+python scripts/download_openapi.py \
+  --endpoint 'https://apis.data.go.kr/B553077/api/open/sdsc2/storeListInUpjong' \
+  --param divId=indsSclsCd \
+  --param key=I20101 \
+  --out data/raw/sbiz_I20101.csv
+```
+
+파일데이터는 포털 로그인 또는 원문파일 버튼이 필요한 경우가 있어, 원문 CSV/ZIP을 `data/raw/`에 내려받은 뒤 변환합니다.
+
 로컬 CSV를 표준 스키마로 변환합니다.
 
 ```bash

@@ -15,6 +15,15 @@ The final transaction text is not available yet. The system therefore learns fro
 - 조달업체 면허 업종 등록 내역 for supplier-to-industry mapping.
 - 한국표준산업분류 for industry label vocabulary and hierarchy.
 
+## Acquisition Strategy
+
+The project uses every legitimate public acquisition route:
+
+- File datasets are ingested from downloaded CSV, ZIP, XLSX, or Parquet files.
+- OpenAPI datasets are collected with paginated data.go.kr requests using `DATA_GO_KR_SERVICE_KEY`.
+- Source metadata is listed in code so each data source has a documented page URL, license note, method, and expected fields.
+- Public pages may be used to discover official download/API locations, but the pipeline does not bypass login, access controls, rate limits, or terms of use.
+
 ## Architecture
 
 The pipeline has three layers. `bizembed.ingest` maps source-specific columns into one canonical schema. `bizembed.normalize` cleans entity strings and creates field-aware model text. `bizembed.pairs` generates weak-supervised positive and hard-negative similarity pairs.

@@ -57,3 +57,20 @@
 - [x] Run the full test suite.
 - [x] Inspect `git diff --check`.
 - [x] Commit all project files.
+
+### Task 5: Public Data Acquisition Layer
+
+**Files:**
+- Create: `src/bizembed/sources.py`
+- Create: `src/bizembed/collect.py`
+- Create: `scripts/list_sources.py`
+- Create: `scripts/download_openapi.py`
+- Create: `scripts/download_sbiz_by_industry.py`
+- Create: `scripts/download_sbiz_all.py`
+- Test: `tests/test_sources.py`
+- Test: `tests/test_collect.py`
+
+- [x] Write tests for source catalog and paginated data.go.kr request helpers.
+- [x] Run tests and verify they fail because acquisition modules do not exist.
+- [x] Implement source catalog, generic OpenAPI downloader, SBIZ industry downloader, and SBIZ all-industry downloader.
+- [x] Run full verification and commit the acquisition layer.

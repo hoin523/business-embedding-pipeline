@@ -16,6 +16,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--repo-type", choices=["dataset", "model"], required=True)
     parser.add_argument("--path", required=True)
     parser.add_argument("--private", action="store_true")
+    parser.add_argument("--large-folder", action="store_true", help="Use resumable large-folder upload.")
     return parser.parse_args()
 
 
@@ -23,6 +24,17 @@ def main() -> None:
     args = parse_args()
     api = HfApi()
     api.create_repo(repo_id=args.repo_id, repo_type=args.repo_type, private=args.private, exist_ok=True)
+    if args.large_folder:
+        api.upload_large_folder(
+            repo_id=args.repo_id,
+            repo_type=args.repo_type,
+            folder_path=str(Path(args.path)),
+            private=args.private,
+            num_workers=8,
+        )
+        print(f"uploaded={args.repo_type}:{args.repo_id}")
+        return
+
     api.upload_folder(
         repo_id=args.repo_id,
         repo_type=args.repo_type,

@@ -11,6 +11,8 @@ def test_catalog_contains_primary_business_sources():
     assert "fairtrade_franchise_api" in names
     assert "dart_company_overview_api" in names
     assert "mcc_codes_csv" in names
+    assert "ksic_r_universe" in names
+    assert "ksure_industry_code_file" in names
 
 
 def test_source_describes_public_access_constraints():

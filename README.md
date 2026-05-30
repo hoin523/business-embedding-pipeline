@@ -135,6 +135,22 @@ python scripts/train_bge_m3.py \
 4. BGE-M3 기반 SentenceTransformer를 `MultipleNegativesRankingLoss`로 1차 학습합니다.
 5. 점수형 라벨이 충분히 쌓이면 `CoSENTLoss` 또는 `CosineSimilarityLoss`로 보정합니다.
 
+카드사/법인카드 사용 내역처럼 실제 입력이 `가맹점명 업종명 기타텍스트` 형태라면
+verbose hierarchy 템플릿 대신 compact pair를 씁니다.
+
+```bash
+python scripts/build_compact_card_pairs.py \
+  --out data/processed/compact_card_training_pairs.parquet
+
+python scripts/train_bge_m3.py \
+  --pairs data/processed/compact_card_training_pairs.parquet \
+  --base-model models/bge-m3-business-ksic11-semantic-context \
+  --output models/bge-m3-business-compact-card-context-v2 \
+  --loss cosine \
+  --batch-size 2 \
+  --device mps
+```
+
 ## Hugging Face
 
 현재 연결된 Hugging Face 계정은 `hoin1218`입니다. `HF_TOKEN`이 있는 환경에서 아래 스크립트로 데이터셋이나 모델을 업로드할 수 있습니다.

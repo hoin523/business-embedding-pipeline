@@ -161,3 +161,33 @@ python scripts/upload_to_hf.py \
   --repo-type dataset \
   --path data/processed
 ```
+
+## 회사 샘플 검증
+
+회사 카드/법인카드 샘플이 준비되면 먼저 템플릿을 참고합니다.
+
+```bash
+python scripts/create_company_eval_template.py --out-dir data/templates
+```
+
+원천 거래 목록에서 compact 텍스트와 top-k 유사 후보를 뽑습니다.
+
+```bash
+python scripts/evaluate_company_samples.py \
+  --mode records \
+  --input data/raw/company_card_sample.csv \
+  --model models/bge-m3-business-compact-card-context-v2 \
+  --out-dir data/processed/company_eval
+```
+
+이미 A/B 비교쌍과 `유사`/`비유사` 라벨이 있으면 threshold 리포트를 만듭니다.
+
+```bash
+python scripts/evaluate_company_samples.py \
+  --mode pairs \
+  --input data/raw/company_pair_labels.csv \
+  --model models/bge-m3-business-compact-card-context-v2 \
+  --out-dir data/processed/company_pair_eval
+```
+
+추가 파인튜닝 후보와 전략은 `docs/fine_tuning_review.md`에 정리했습니다.

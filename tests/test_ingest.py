@@ -46,6 +46,41 @@ def test_standardize_supplier_columns_with_item_name():
     assert result.loc[0, "text"] == "공급업체명: 한국식품유통 | 업종명: 식자재 도매업 | 품목명: 급식재료"
 
 
+def test_standardize_nara_supplier_item_export_columns():
+    raw = pd.DataFrame(
+        [
+            {
+                "업체명": "경원농자재",
+                "물품분류명": "온실설치공사",
+                "세부품명": "온실설치공사",
+            }
+        ]
+    )
+
+    result = standardize_dataframe(raw, source="nara")
+
+    assert result.loc[0, "entity_name"] == "경원농자재"
+    assert result.loc[0, "item_name"] == "온실설치공사"
+    assert result.loc[0, "text"] == "공급업체명: 경원농자재 | 품목명: 온실설치공사"
+
+
+def test_standardize_nara_registration_export_columns():
+    raw = pd.DataFrame(
+        [
+            {
+                "업체명": "한국식품유통",
+                "대표업종": "식자재 도매업",
+                "대표세부품명": "급식재료",
+            }
+        ]
+    )
+
+    result = standardize_dataframe(raw, source="nara")
+
+    assert result.loc[0, "industry_name"] == "식자재 도매업"
+    assert result.loc[0, "item_name"] == "급식재료"
+
+
 def test_read_table_concatenates_zip_csv_files(tmp_path):
     zip_path = tmp_path / "stores.zip"
     with zipfile.ZipFile(zip_path, "w") as archive:
@@ -61,3 +96,21 @@ def test_read_table_concatenates_zip_csv_files(tmp_path):
 def test_source_usecols_limits_sbiz_to_training_fields():
     assert "상호명" in source_usecols("sbiz")
     assert "도로명주소" not in source_usecols("sbiz")
+
+
+def test_read_table_detects_mstr_excel_header_row(tmp_path):
+    path = tmp_path / "mstr.xlsx"
+    raw = pd.DataFrame(
+        [
+            ["검색조건", None, None],
+            [None, None, None],
+            ["업체명", "물품분류명", "세부품명"],
+            ["경원농자재", "온실설치공사", "온실설치공사"],
+        ]
+    )
+    raw.to_excel(path, index=False, header=False)
+
+    result = read_table(path, usecols=source_usecols("nara"))
+
+    assert result.columns.tolist() == ["업체명", "물품분류명", "세부품명"]
+    assert result.loc[0, "업체명"] == "경원농자재"

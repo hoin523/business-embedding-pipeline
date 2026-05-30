@@ -33,6 +33,36 @@ def test_generate_pairs_creates_same_industry_positive():
     assert pairs.loc[0, "label"] == 0.85
 
 
+def test_generate_pairs_creates_same_item_positive_when_industry_is_missing():
+    records = pd.DataFrame(
+        [
+            {
+                "entity_name": "경원농자재",
+                "entity_type": "supplier",
+                "industry_name": "",
+                "industry_code": "",
+                "item_name": "온실설치공사",
+                "source": "nara",
+                "text": "공급업체명: 경원농자재 | 품목명: 온실설치공사",
+            },
+            {
+                "entity_name": "그린온실",
+                "entity_type": "supplier",
+                "industry_name": "",
+                "industry_code": "",
+                "item_name": "온실설치공사",
+                "source": "nara",
+                "text": "공급업체명: 그린온실 | 품목명: 온실설치공사",
+            },
+        ]
+    )
+
+    pairs = generate_pairs(records)
+
+    assert list(pairs["relation"]) == ["same_item"]
+    assert pairs.loc[0, "label"] == 0.85
+
+
 def test_generate_pairs_creates_hard_negative_for_same_name_different_industry():
     records = pd.DataFrame(
         [

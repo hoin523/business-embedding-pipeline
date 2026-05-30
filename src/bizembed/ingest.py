@@ -39,6 +39,7 @@ COLUMN_ALIASES: Dict[str, Iterable[str]] = {
     "industry_name": (
         "업종명",
         "업종",
+        "대표업종",
         "업태명",
         "업태구분명",
         "표준산업분류명",
@@ -57,7 +58,10 @@ COLUMN_ALIASES: Dict[str, Iterable[str]] = {
         "공급물품명",
         "물품명",
         "품목명",
+        "대표품명",
+        "대표세부품명",
         "세부품명",
+        "세부품명(명칭)",
         "물품분류명",
         "상품명",
     ),
@@ -135,7 +139,22 @@ def read_table(path: str | Path, *, usecols: Optional[Iterable[str]] = None) -> 
     if suffix == ".parquet":
         return pd.read_parquet(path, columns=list(usecols_set) if usecols_set else None)
     if suffix in {".xlsx", ".xls"}:
-        return pd.read_excel(path, usecols=list(usecols_set) if usecols_set else None)
+        excel_usecols = list(usecols_set) if usecols_set else None
+        try:
+            frame = pd.read_excel(path, dtype=str, usecols=excel_usecols)
+        except ValueError:
+            frame = pd.DataFrame()
+        if usecols_set and not set(frame.columns).intersection(usecols_set):
+            preview = pd.read_excel(path, dtype=str, header=None, nrows=30)
+            header_row = None
+            for idx, row in preview.iterrows():
+                values = {str(value).strip() for value in row.dropna().tolist()}
+                if len(values.intersection(usecols_set)) >= 2:
+                    header_row = idx
+                    break
+            if header_row is not None:
+                frame = pd.read_excel(path, dtype=str, header=header_row, usecols=usecols_arg)
+        return frame
     if suffix == ".zip":
         frames = []
         with zipfile.ZipFile(path) as archive:
@@ -166,5 +185,18 @@ def source_usecols(source: str) -> Optional[list[str]]:
             "표준산업분류명",
         ]
     if source in {"nara", "license"}:
-        return ["업체명", "업종명", "업종코드", "공급물품명", "물품명", "품목명"]
+        return [
+            "업체명",
+            "업종명",
+            "대표업종",
+            "업종코드",
+            "공급물품명",
+            "물품명",
+            "품목명",
+            "대표품명",
+            "대표세부품명",
+            "세부품명",
+            "세부품명(명칭)",
+            "물품분류명",
+        ]
     return None

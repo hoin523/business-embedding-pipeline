@@ -11,6 +11,8 @@ import pandas as pd
 from sentence_transformers import InputExample, SentenceTransformer, losses
 from torch.utils.data import DataLoader
 
+from bizembed.training import prepare_training_pairs
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Fine-tune BGE-M3 on Korean business similarity pairs.")
@@ -20,7 +22,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--epochs", type=int, default=1)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--learning-rate", type=float, default=2e-5)
+    parser.add_argument("--loss", choices=("mnrl", "cosine"), default="mnrl")
     parser.add_argument("--max-positive-pairs", type=int, default=10000)
+    parser.add_argument("--max-pairs", type=int, default=0, help="Cap total pairs for cosine loss.")
     parser.add_argument("--device", default=None, help="Optional torch device, for example mps, cuda, or cpu.")
     return parser.parse_args()
 
@@ -34,19 +38,28 @@ def read_pairs(path: str) -> pd.DataFrame:
 def main() -> None:
     args = parse_args()
     pairs = read_pairs(args.pairs)
-    pairs = pairs[pairs["label"] >= 0.7].copy()
-    if args.max_positive_pairs and len(pairs) > args.max_positive_pairs:
-        pairs = pairs.sample(n=args.max_positive_pairs, random_state=42)
+    pairs = prepare_training_pairs(
+        pairs,
+        loss_name=args.loss,
+        max_positive_pairs=args.max_positive_pairs,
+        max_pairs=args.max_pairs,
+    )
     examples = [
-        InputExample(texts=[row.text_a, row.text_b])
+        InputExample(
+            texts=[row.text_a, row.text_b],
+            label=float(row.label),
+        )
         for row in pairs.itertuples(index=False)
     ]
     if not examples:
-        raise SystemExit("No positive pairs found. Generate pairs before training.")
+        raise SystemExit("No training pairs found. Generate pairs before training.")
 
     model = SentenceTransformer(args.base_model, device=args.device)
     train_loader = DataLoader(examples, shuffle=True, batch_size=args.batch_size)
-    train_loss = losses.MultipleNegativesRankingLoss(model)
+    if args.loss == "cosine":
+        train_loss = losses.CosineSimilarityLoss(model)
+    else:
+        train_loss = losses.MultipleNegativesRankingLoss(model)
     model.fit(
         train_objectives=[(train_loader, train_loss)],
         epochs=args.epochs,

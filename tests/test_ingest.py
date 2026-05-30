@@ -86,6 +86,101 @@ def test_standardize_corporate_card_supplier_columns():
     assert result.loc[0, "text"] == "공급업체명: 한국식품유통 | 업종명: 식자재 도매업 | 품목명: 급식재료"
 
 
+def test_standardize_public_card_usage_columns():
+    raw = pd.DataFrame(
+        [
+            {
+                "가맹점": "두부사랑",
+                "사용내역": "업무회의 식사",
+                "사용방법": "카드",
+            }
+        ]
+    )
+
+    result = standardize_dataframe(raw, source="public_card")
+
+    assert result.loc[0, "entity_name"] == "두부사랑"
+    assert result.loc[0, "entity_type"] == "merchant"
+    assert result.loc[0, "item_name"] == "업무회의 식사"
+    assert result.loc[0, "text"] == "가맹점명: 두부사랑 | 품목명: 업무회의 식사"
+
+
+def test_standardize_localdata_license_columns():
+    raw = pd.DataFrame(
+        [
+            {
+                "사업장명": "서울정형외과",
+                "업태구분명": "의원",
+                "인허가업종": "의료기관",
+            }
+        ]
+    )
+
+    result = standardize_dataframe(raw, source="localdata")
+
+    assert result.loc[0, "entity_name"] == "서울정형외과"
+    assert result.loc[0, "entity_type"] == "merchant"
+    assert result.loc[0, "industry_name"] == "의원"
+    assert result.loc[0, "text"] == "가맹점명: 서울정형외과 | 업종명: 의원"
+
+
+def test_standardize_franchise_brand_columns():
+    raw = pd.DataFrame(
+        [
+            {
+                "영업표지": "메가MGC커피",
+                "업종": "커피",
+                "가맹본부": "앤하우스",
+            }
+        ]
+    )
+
+    result = standardize_dataframe(raw, source="franchise")
+
+    assert result.loc[0, "entity_name"] == "메가MGC커피"
+    assert result.loc[0, "entity_type"] == "merchant"
+    assert result.loc[0, "industry_name"] == "커피"
+
+
+def test_standardize_dart_company_columns():
+    raw = pd.DataFrame(
+        [
+            {
+                "corp_name": "대한항공",
+                "induty_code": "51100",
+                "induty_name": "항공 여객 운송업",
+            }
+        ]
+    )
+
+    result = standardize_dataframe(raw, source="dart")
+
+    assert result.loc[0, "entity_name"] == "대한항공"
+    assert result.loc[0, "entity_type"] == "company"
+    assert result.loc[0, "industry_name"] == "항공 여객 운송업"
+    assert result.loc[0, "industry_code"] == "51100"
+
+
+def test_standardize_mcc_columns():
+    raw = pd.DataFrame(
+        [
+            {
+                "MCC": "4511",
+                "MCC업종명": "항공사",
+                "MCC설명": "Airlines, Air Carriers",
+            }
+        ]
+    )
+
+    result = standardize_dataframe(raw, source="mcc")
+
+    assert result.loc[0, "entity_type"] == "merchant"
+    assert result.loc[0, "industry_name"] == "항공사"
+    assert result.loc[0, "industry_code"] == "4511"
+    assert result.loc[0, "item_name"] == "Airlines Air Carriers"
+    assert result.loc[0, "text"] == "업종명: 항공사 | 품목명: Airlines Air Carriers"
+
+
 def test_standardize_nara_supplier_item_export_columns():
     raw = pd.DataFrame(
         [

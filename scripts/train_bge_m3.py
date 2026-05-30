@@ -25,6 +25,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--loss", choices=("mnrl", "cosine"), default="mnrl")
     parser.add_argument("--max-positive-pairs", type=int, default=10000)
     parser.add_argument("--max-pairs", type=int, default=0, help="Cap total pairs for cosine loss.")
+    parser.add_argument(
+        "--negative-ratio",
+        type=float,
+        default=0,
+        help="For cosine loss, sample at most this many negative pairs per positive pair. 0 keeps all pairs.",
+    )
     parser.add_argument("--device", default=None, help="Optional torch device, for example mps, cuda, or cpu.")
     return parser.parse_args()
 
@@ -43,6 +49,7 @@ def main() -> None:
         loss_name=args.loss,
         max_positive_pairs=args.max_positive_pairs,
         max_pairs=args.max_pairs,
+        negative_ratio=args.negative_ratio,
     )
     examples = [
         InputExample(

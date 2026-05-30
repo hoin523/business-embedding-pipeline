@@ -59,12 +59,14 @@ def generate_pairs(records: pd.DataFrame, *, max_pairs_per_group: int = 50) -> p
     pairs: List[Dict[str, object]] = []
 
     for semantic_key, group in work[work["semantic_key"].astype(bool)].groupby("semantic_key"):
+        group_pair_count = 0
         unique = group.drop_duplicates("text").head(max_pairs_per_group + 1)
         for left, right in combinations(unique.to_dict("records"), 2):
             if left["entity_key"] == right["entity_key"]:
                 continue
             pairs.append(_pair(left["text"], right["text"], 0.85, _positive_relation(str(semantic_key))))
-            if len(pairs) >= max_pairs_per_group:
+            group_pair_count += 1
+            if group_pair_count >= max_pairs_per_group:
                 break
 
     for _, group in work[work["entity_key"].astype(bool)].groupby("entity_key"):

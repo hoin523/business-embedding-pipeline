@@ -27,3 +27,17 @@ def test_prepare_training_pairs_cosine_keeps_positive_and_negative_pairs():
     result = prepare_training_pairs(pairs, loss_name="cosine")
 
     assert result["label"].tolist() == [0.85, 0.20]
+
+
+def test_prepare_training_pairs_cosine_can_balance_negatives_by_positive_count():
+    pairs = pd.DataFrame(
+        [
+            {"text_a": f"a{i}", "text_b": f"b{i}", "label": label, "relation": "r"}
+            for i, label in enumerate([0.85, 0.90, 0.20, 0.20, 0.10, 0.20, 0.10])
+        ]
+    )
+
+    result = prepare_training_pairs(pairs, loss_name="cosine", negative_ratio=2, seed=1)
+
+    assert len(result[result["label"] >= 0.7]) == 2
+    assert len(result[result["label"] < 0.7]) == 4

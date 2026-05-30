@@ -7,6 +7,10 @@ def test_catalog_contains_primary_business_sources():
     assert "sbiz_store_api" in names
     assert "nara_user_api" in names
     assert "nara_supplier_license_file" in names
+    assert "localdata_license_download" in names
+    assert "fairtrade_franchise_api" in names
+    assert "dart_company_overview_api" in names
+    assert "mcc_codes_csv" in names
 
 
 def test_source_describes_public_access_constraints():
@@ -23,3 +27,5 @@ def test_sources_requiring_service_key_are_listed():
 
     assert "sbiz_store_api" in names
     assert "nara_user_api" in names
+    assert "fairtrade_franchise_api" in names
+    assert "dart_company_overview_api" in names

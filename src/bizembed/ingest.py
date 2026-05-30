@@ -23,8 +23,13 @@ SOURCE_ENTITY_TYPES = {
     "sbiz": "merchant",
     "card": "merchant",
     "corporate_card": "supplier",
+    "public_card": "merchant",
+    "localdata": "merchant",
+    "franchise": "merchant",
+    "mcc": "merchant",
     "nara": "supplier",
     "license": "supplier",
+    "dart": "company",
     "ksic": "company",
 }
 
@@ -43,8 +48,14 @@ COLUMN_ALIASES: Dict[str, Iterable[str]] = {
         "사용처명",
         "상점명",
         "매장명",
+        "가맹점",
+        "사업장명",
+        "영업표지",
+        "브랜드명",
+        "가맹본부",
         "법인명",
         "회사명",
+        "corp_name",
     ),
     "industry_name": (
         "업종명",
@@ -62,6 +73,10 @@ COLUMN_ALIASES: Dict[str, Iterable[str]] = {
         "대표업종",
         "업태명",
         "업태구분명",
+        "인허가업종",
+        "영업상태명",
+        "MCC카테고리",
+        "induty_name",
         "표준산업분류명",
         "상권업종소분류명",
         "상권업종중분류명",
@@ -77,6 +92,7 @@ COLUMN_ALIASES: Dict[str, Iterable[str]] = {
         "MCC코드",
         "mcc",
         "mcc코드",
+        "induty_code",
         "표준산업분류코드",
         "상권업종소분류코드",
         "상권업종중분류코드",
@@ -92,6 +108,11 @@ COLUMN_ALIASES: Dict[str, Iterable[str]] = {
         "세부품명(명칭)",
         "물품분류명",
         "상품명",
+        "사용내역",
+        "집행목적",
+        "MCC설명",
+        "combined_description",
+        "edited_description",
     ),
 }
 
@@ -213,41 +234,57 @@ def source_usecols(source: str) -> Optional[list[str]]:
             "표준산업분류명",
         ]
     if source in {"card", "corporate_card"}:
+        return card_usecols()
+    if source == "public_card":
         return [
+            "가맹점",
             "가맹점명",
-            "카드가맹점명",
-            "가맹점상호",
-            "가맹점상호명",
-            "상호명",
             "사용처명",
-            "상점명",
-            "매장명",
-            "공급업체명",
-            "공급자명",
-            "거래처명",
+            "사용내역",
+            "집행목적",
             "업종명",
+            "사용방법",
+        ]
+    if source == "localdata":
+        return [
+            "사업장명",
+            "업태구분명",
+            "인허가업종",
+            "영업상태명",
+            "상세영업상태명",
+            "도로명주소",
+        ]
+    if source == "franchise":
+        return [
+            "영업표지",
+            "브랜드명",
+            "가맹본부",
             "업종",
-            "카드업종명",
-            "카드사업종명",
-            "가맹점업종명",
-            "가맹점업종",
-            "가맹점유형명",
-            "가맹점유형",
-            "MCC명",
-            "MCC업종명",
-            "mcc명",
-            "mcc업종명",
+            "업종명",
+            "대표업종",
+        ]
+    if source == "dart":
+        return [
+            "corp_name",
+            "corp_code",
+            "corp_cls",
+            "stock_name",
+            "induty_code",
+            "induty_name",
+            "회사명",
+            "업종명",
             "업종코드",
-            "카드업종코드",
-            "카드사업종코드",
-            "가맹점업종코드",
-            "가맹점유형코드",
+        ]
+    if source == "mcc":
+        return [
             "MCC",
             "MCC코드",
+            "MCC업종명",
+            "MCC카테고리",
+            "MCC설명",
             "mcc",
-            "mcc코드",
-            "품목명",
-            "상품명",
+            "edited_description",
+            "combined_description",
         ]
     if source in {"nara", "license"}:
         return [
@@ -265,3 +302,42 @@ def source_usecols(source: str) -> Optional[list[str]]:
             "물품분류명",
         ]
     return None
+
+
+def card_usecols() -> list[str]:
+    return [
+        "가맹점명",
+        "카드가맹점명",
+        "가맹점상호",
+        "가맹점상호명",
+        "상호명",
+        "사용처명",
+        "상점명",
+        "매장명",
+        "공급업체명",
+        "공급자명",
+        "거래처명",
+        "업종명",
+        "업종",
+        "카드업종명",
+        "카드사업종명",
+        "가맹점업종명",
+        "가맹점업종",
+        "가맹점유형명",
+        "가맹점유형",
+        "MCC명",
+        "MCC업종명",
+        "mcc명",
+        "mcc업종명",
+        "업종코드",
+        "카드업종코드",
+        "카드사업종코드",
+        "가맹점업종코드",
+        "가맹점유형코드",
+        "MCC",
+        "MCC코드",
+        "mcc",
+        "mcc코드",
+        "품목명",
+        "상품명",
+    ]

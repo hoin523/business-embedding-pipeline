@@ -19,6 +19,7 @@
 권장 원천은 공식 공공데이터입니다.
 
 - 소상공인시장진흥공단 상가(상권)정보: 가맹점명/상호명, 업종코드, 업종명
+- 카드사/법인카드/지역화폐/급식카드 가맹점 파일: 가맹점명/공급업체명, 카드업종코드, 카드업종명, MCC
 - 조달청 나라장터 사용자정보/업체정보: 공급업체명, 등록업종, 공급물품
 - 조달업체 면허 업종 등록 내역: 업체명, 사업자번호, 업종코드, 업종명
 - 한국표준산업분류: 업종 라벨 사전
@@ -87,11 +88,42 @@ python scripts/prepare_dataset.py \
   --pairs-out data/processed/pairs.parquet
 ```
 
+카드사 또는 카드 가맹점 CSV/XLSX는 `card` 소스로 변환합니다.
+
+```bash
+python scripts/prepare_dataset.py \
+  --source card \
+  --input data/raw/card_merchants.csv \
+  --records-out data/processed/card_records.parquet \
+  --pairs-out data/processed/card_pairs.parquet
+```
+
+법인카드 정산 파일처럼 거래 상대가 `공급업체명`으로 들어오는 경우에는 `corporate_card` 소스를 씁니다.
+
+```bash
+python scripts/prepare_dataset.py \
+  --source corporate_card \
+  --input data/raw/corporate_card_suppliers.xlsx \
+  --records-out data/processed/corporate_card_records.parquet \
+  --pairs-out data/processed/corporate_card_pairs.parquet
+```
+
+지원하는 대표 컬럼명은 `가맹점명`, `카드가맹점명`, `가맹점상호명`, `공급업체명`, `거래처명`, `업종명`, `카드업종명`, `가맹점업종명`, `MCC명`, `MCC코드`, `가맹점업종코드`, `품목명`, `상품명`입니다.
+
+기존 SBIZ/나라장터 pair와 카드 pair를 합칩니다.
+
+```bash
+python scripts/combine_pairs.py \
+  --input data/processed/business_combined_pairs.parquet \
+  --input data/processed/card_pairs.parquet \
+  --out data/processed/business_card_combined_pairs.parquet
+```
+
 BGE-M3를 파인튜닝합니다.
 
 ```bash
 python scripts/train_bge_m3.py \
-  --pairs data/processed/pairs.parquet \
+  --pairs data/processed/business_card_combined_pairs.parquet \
   --output models/bge-m3-business-lora
 ```
 

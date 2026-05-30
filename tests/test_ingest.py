@@ -46,6 +46,46 @@ def test_standardize_supplier_columns_with_item_name():
     assert result.loc[0, "text"] == "공급업체명: 한국식품유통 | 업종명: 식자재 도매업 | 품목명: 급식재료"
 
 
+def test_standardize_card_merchant_columns():
+    raw = pd.DataFrame(
+        [
+            {
+                "카드가맹점명": "보나비",
+                "가맹점업종명": "일반한식",
+                "MCC코드": "5812",
+            }
+        ]
+    )
+
+    result = standardize_dataframe(raw, source="card")
+
+    assert result.loc[0, "entity_name"] == "보나비"
+    assert result.loc[0, "entity_type"] == "merchant"
+    assert result.loc[0, "industry_name"] == "일반한식"
+    assert result.loc[0, "industry_code"] == "5812"
+    assert result.loc[0, "text"] == "가맹점명: 보나비 | 업종명: 일반한식"
+
+
+def test_standardize_corporate_card_supplier_columns():
+    raw = pd.DataFrame(
+        [
+            {
+                "공급업체명": "한국식품유통",
+                "카드업종명": "식자재 도매업",
+                "품목명": "급식재료",
+            }
+        ]
+    )
+
+    result = standardize_dataframe(raw, source="corporate_card")
+
+    assert result.loc[0, "entity_name"] == "한국식품유통"
+    assert result.loc[0, "entity_type"] == "supplier"
+    assert result.loc[0, "industry_name"] == "식자재 도매업"
+    assert result.loc[0, "item_name"] == "급식재료"
+    assert result.loc[0, "text"] == "공급업체명: 한국식품유통 | 업종명: 식자재 도매업 | 품목명: 급식재료"
+
+
 def test_standardize_nara_supplier_item_export_columns():
     raw = pd.DataFrame(
         [
@@ -96,6 +136,12 @@ def test_read_table_concatenates_zip_csv_files(tmp_path):
 def test_source_usecols_limits_sbiz_to_training_fields():
     assert "상호명" in source_usecols("sbiz")
     assert "도로명주소" not in source_usecols("sbiz")
+
+
+def test_source_usecols_includes_card_training_fields():
+    assert "카드가맹점명" in source_usecols("card")
+    assert "MCC코드" in source_usecols("card")
+    assert "도로명주소" not in source_usecols("card")
 
 
 def test_read_table_detects_mstr_excel_header_row(tmp_path):

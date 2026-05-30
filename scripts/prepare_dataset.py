@@ -15,7 +15,7 @@ from bizembed.pairs import generate_pairs
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Prepare Korean business embedding records and pairs.")
-    parser.add_argument("--source", required=True, help="Source name: sbiz, nara, license, ksic, or custom.")
+    parser.add_argument("--source", required=True, help="Source name: sbiz, card, corporate_card, nara, license, ksic, or custom.")
     parser.add_argument("--input", action="append", required=True, help="Input CSV/XLSX/Parquet/ZIP file. Repeatable.")
     parser.add_argument("--records-out", required=True, help="Output canonical records parquet path.")
     parser.add_argument("--pairs-out", required=True, help="Output pair parquet path.")
